@@ -33,4 +33,4 @@ Atualmente, o script não processa as seguintes informações:
 - Exercício de opções
 - Vencimento de opções sem exercício
 
-O desenvolvimento destas e outras funcionalidades é esperado no futuro
+A compra e venda de opções é processada normalmente. O desenvolvimento destas e outras funcionalidades é esperado no futuro
