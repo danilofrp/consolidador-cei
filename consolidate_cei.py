@@ -38,6 +38,7 @@ def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False)
         save_data = transactions.copy()
         save_data.index = save_data.index.dt.date
         save_data.to_excel('consolidado_cei.xlsx')
+        print('Dados salvos na planilha consolidado_cei.xlsx')
 
     return transactions
 
