@@ -1,12 +1,12 @@
 # Consolidação de extratos do CEI para imposto de renda (IRPF)
 
-Estes script visa facilitar a declaração do imposto de renda da pessoa física (IRPF), através da consolidação dos extratos gerados pelo Canal Eletrônico do Investidor (CEI), da B3. Com geração automática de reports como declaração de bens e posição na data desejada, deixar suas Ações, Opções e FIIs em dia com o leão fica muito mais simples.
+Estes script visa facilitar a declaração do imposto de renda da pessoa física (IRPF), através da consolidação dos extratos gerados pelo Canal Eletrônico do Investidor (CEI), da B3. Com geração automática de reports como declaração de bens e posição na data desejada, deixar suas Ações, Opções e FIIs em dia com o leão fica muito mais fácil. O script também retorna um histórico de toda as compras e vendas do ativo, para acompanhamento e discriminação de maneira simples.
 
 ### Requisitos:
  - [Python 3.7.x](https://www.python.org)
  - [pandas](https://pandas.pydata.org)
 
-### Condições:
+### Preparo:
 Os extratos de negociação do [CEI](https://cei.b3.com.br) (Etratos e Informativos > Negociação de ativos) devem estar em formato excel, localizados na pasta `extratos_cei`, e seguir o seguinte padrão de nomeclatura: `[ano]_negociacoes_cei_[corretora].xls` (Ex.: 2019_negociacoes_cei_clear.xls). Não deve haver sobreposição entre as datas dos arquivos, isto é, dados da mesma transição que se encontrem em dois arquivos diferentes serão considerados como duas transações iguais. A recomendação é que se gere um único arquivo por ao/corretora, de 1º de Janeiro a 31 de Dezembro.
 
 ### Modo de uso:
