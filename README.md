@@ -50,7 +50,7 @@ Rodando o comando
 ```
 python process_transactions.py --declaracao 2019
 ```
-o script nos dá todas as posições em 31 de dezembro de 2018 e de 2019, e também o lucro/prejuízo realizado a cada mês, em diferentes abas. Note que, nesta planilha, o histórico mostra as transações **apenas** no ano base. Estas informaçoes ficam salvas na planilha `declaracao_2019.xlsx`, que pode ser vista abaixo:
+o script consolida informações compra e venda de ações para imposto de renda, nos dando todas as posições em 31 de dezembro de 2018 e de 2019, e também o lucro/prejuízo realizado a cada mês, em diferentes abas. Note que, nesta planilha, o histórico mostra as transações **apenas** no ano base. Estas informaçoes ficam salvas na planilha `declaracao_2019.xlsx`, que pode ser vista abaixo:
 
 **declaracao_2019.xlsx -> Declaração de bens**<br>
 ![declaracao_2019.xlsx -> Declaração de bens](https://github.com/danilofrp/consolidador-cei/blob/master/img/declaracao.png "declaracao_2019.xlsx -> Declaração de bens")
