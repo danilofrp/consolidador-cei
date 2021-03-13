@@ -1,5 +1,6 @@
 import os
 import re
+import xlrd
 import pandas as pd
 
 def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False):
@@ -13,7 +14,8 @@ def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False)
         broker = re.search(r'negociacoes_cei_(.*)\.xlsx?$', cei_file)[1]
         filepath = os.path.join(base_folder, cei_file)
 
-        file_transactions = pd.read_excel(filepath, header = 10, usecols = cols).dropna(subset = ['Código'])
+        wb = xlrd.open_workbook(filepath, logfile=open(os.devnull, 'w'))
+        file_transactions = pd.read_excel(wb, header = 10, usecols=cols, engine='xlrd').dropna(subset = ['Código'])
         file_transactions['Corretora'] = broker
 
         transactions = transactions.append(file_transactions, ignore_index = True)
