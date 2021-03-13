@@ -36,12 +36,15 @@ def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False)
     for col in ['Fluxo', 'Mercado', 'Codigo', 'Ativo']:
         transactions[col] = transactions[col].str.strip()
     
-    transactions['Codigo'] = transactions['Codigo'].apply(lambda s: re.sub('F$', '', s))
+    transactions['Codigo'] = transactions['Codigo'].str.replace("F$", "")
+    transactions['Quantidade'] = transactions['Quantidade'] * transactions['Fluxo'].map({"C": 1, "V": -1})
+    transactions['Valor Total'] = transactions['Valor Total'] * transactions['Fluxo'].map({"C": 1, "V": -1})
 
     if save_to_file:
         save_data = transactions.copy()
         save_data.index = save_data.index.date
-        save_data.to_excel('consolidado_cei.xlsx')
+        save_data.index.name = "Data"
+        save_data.reset_index().to_excel('consolidado_cei.xlsx', index = False)
         print('Dados salvos na planilha consolidado_cei.xlsx')
 
     return transactions
