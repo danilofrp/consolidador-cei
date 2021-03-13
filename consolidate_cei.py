@@ -8,6 +8,8 @@ def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False)
     cei_files = os.listdir(base_folder)
     transactions = pd.DataFrame()
     for cei_file in cei_files:
+        if (cei_file == '.DS_Store'): continue # for macOS compatibility
+
         broker = re.search(r'negociacoes_cei_(.*)\.xlsx?$', cei_file)[1]
         filepath = os.path.join(base_folder, cei_file)
 
