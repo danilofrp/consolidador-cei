@@ -92,7 +92,7 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
     ignore_history_previous_to = int(ignore_history_previous_to)
 
     positions = {}
-    realised_monthly = pd.Series(index = list(range(1, 13)), name = 'Realizado Mensal')
+    realised_monthly = pd.Series(index = list(range(1, 13)), name = 'Realizado Mensal', dtype = "float64")
     realised_monthly.fillna(0, inplace = True)
     realised_monthly.index.name = 'Mês'
 
