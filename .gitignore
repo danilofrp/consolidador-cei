@@ -1,4 +1,6 @@
 *.xlsx
+extratos_cei/
+extratos_mensais/
 
 
 # Byte-compiled / optimized / DLL files
