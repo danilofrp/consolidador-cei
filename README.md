@@ -9,7 +9,9 @@ Este script visa facilitar a declaração do imposto de renda da pessoa física 
  - [pandas](https://pandas.pydata.org)
 
 ### Preparo:
-Os extratos de negociação do [CEI](https://cei.b3.com.br) (Etratos e Informativos > Negociação de ativos) devem estar em formato excel, localizados na pasta `extratos_cei`, e seguir o seguinte padrão de nomeclatura: `[ano]_negociacoes_cei_[corretora].xls` (Ex.: 2019_negociacoes_cei_clear.xls). Não deve haver sobreposição entre as datas dos arquivos, isto é, dados da mesma transição que se encontrem em dois arquivos diferentes serão considerados como duas transações iguais. A recomendação é que se gere um único arquivo por ao/corretora, de 1º de Janeiro a 31 de Dezembro.
+Os extratos de negociação do [CEI](https://cei.b3.com.br) (Extratos e Informativos > Negociação de ativos) devem estar em formato excel, localizados na pasta `extratos_cei`, e seguir o seguinte padrão de nomeclatura: `[ano]_negociacoes_cei_[corretora].xls` (Ex.: 2019_negociacoes_cei_clear.xls). Não deve haver sobreposição entre as datas dos arquivos, isto é, dados da mesma transição que se encontrem em dois arquivos diferentes serão considerados como duas transações iguais. A recomendação é que se gere um único arquivo por ao/corretora, de 1º de Janeiro a 31 de Dezembro.
+
+Para a consolidação de proventos recebidos (Dividenos e JSCP), são necessários os extratos mensais do CEI (Extratos e Informativos > Extrato BM&FBOVESPA), também em formato excel, e localizados na pasta `extratos_mensais`. O padrão de nomeclatura deve ser `[ano]-[mês]_extrato_cei_[corretora].xls` (Ex.: 2019_extrato_cei_clear.xls). 
 
 ### Modo de uso:
 No momento, há dois modos de uso possíveis:
@@ -28,6 +30,12 @@ Adicionalmente, pode-se criar uma planilha consolidando todos os extratos em um 
 ```
 python consolidate_cei.py
 ```
+
+Caso os extratos mensais estejam disponíveis, a consolidação de proventos é feita pelo comando:
+```python
+python consolidate_earnings.py
+```
+O resultado será salvo na planilha `consolidado_proventos.xslx`, contendo 6 abas. Para os proventos provisionados e creditados, há uma aba com a lista completa, uma com o valor agregado mensalmente e por último uma com agragação por ativo. Infelizmente, o CEI não diferencia Dividendos (Isentos de Imposto) de JSCP (alíquota de 15%, descontada na fonte), de forma que esta planilha serve apenas para conferência, e não como fonte de dados para a declaração.
 
 #### Exemplo de uso:
 Na pasta `extratos_cei` se encontram duas planilhas, `2018_negociacoes_cei_clear.xls` e `2019_negociacoes_cei_clear.xls`. O conteúdo destas planilhas pode ser visto abaixo:

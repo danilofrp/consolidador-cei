@@ -1,4 +1,5 @@
 *.xlsx
+*.xlsx#
 extratos_cei/
 extratos_mensais/
 
