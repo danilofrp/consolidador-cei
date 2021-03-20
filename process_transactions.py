@@ -148,12 +148,12 @@ def process_buy(index, position, transaction, ignore_history = False):
 def process_sell(index, position, transaction, ignore_history = False):
     realised = 0
     if position['status'] == 'long':
-        realised = transaction['Quantidade'] * (transaction['Preco'] - position['preco_medio'])
+        realised = (-transaction['Quantidade']) * (transaction['Preco'] - position['preco_medio'])
     else:
-        position['preco_medio'] = ((-position['qtd'])*position['preco_medio'] + transaction['Quantidade']*transaction['Preco'])/((-position['qtd']) + transaction['Quantidade'])
-    position['qtd'] = position['qtd'] - transaction['Quantidade']
+        position['preco_medio'] = ((-position['qtd'])*position['preco_medio'] - transaction['Quantidade']*transaction['Preco'])/((-position['qtd']) - transaction['Quantidade'])
+    position['qtd'] = position['qtd'] + transaction['Quantidade']
     if not ignore_history:
-        position['historico'].append(f'{index.date()} Venda de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+        position['historico'].append(f'{index.date()} Venda de {position["asset"]} ({-transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
 
     return position, realised
 
