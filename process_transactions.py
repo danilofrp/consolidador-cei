@@ -171,6 +171,7 @@ def update_position_status(position):
 
 def prepare_position_dataframe(positions):
     positions_df = pd.DataFrame(positions).T.sort_index()
+    positions_df["preco_medio"] = positions_df["preco_medio"].astype(float).round(2)
     positions_df['Valor Total'] = positions_df['preco_medio'] * positions_df['qtd']
     positions_df.rename(columns = {'asset': 'Ativo', 'preco_medio': 'Preço Médio', 'qtd': 'Quantidade'}, inplace = True)
     positions_df['Historico'] = positions_df['historico'].apply(lambda x: str.join('\n', x))
