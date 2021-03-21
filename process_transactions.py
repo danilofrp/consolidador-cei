@@ -18,29 +18,39 @@ def main():
     # transactions = pd.read_excel('consolidado_cei.xlsx', index_col = 'Data', parse_dates = True).sort_index()
 
     if action == '--declaracao':
-        declaration, realised_monthly, realised_monthly_fii = get_declaration_info(transactions, param)
+        declaration, realised_monthly_stocks, realised_monthly_fii, realised_monthly_options = get_declaration_info(transactions, param)
+        realised_monthly = pd.concat([realised_monthly_stocks, realised_monthly_fii, realised_monthly_options], axis = 1).fillna(0).sum(axis = 1)
+        realised_monthly.name = "Realizado"
+        realised_monthly.index.name = "Mês"
 
         filename = f'declaracao_{param}.xlsx'
         
         writer = pd.ExcelWriter(filename)
         declaration.to_excel(writer, 'Declaração de Bens')
         realised_monthly.to_excel(writer, 'Lucro Realizado Total')
-        realised_monthly_fii.to_excel(writer, 'Lucro Realizado (Somente FIIs)')
+        realised_monthly_stocks.to_excel(writer, 'Lucro Realizado (Ações)')
+        realised_monthly_options.to_excel(writer, 'Lucro Realizado (Opções)')
+        realised_monthly_fii.to_excel(writer, 'Lucro Realizado (FIIs)')
         writer.save()
 
         beutify_positions_excel(filename, history_column = 'F')
         print(f'Declaracao salva em {filename}')
 
     elif action == '--posicao':
-        positions, realised_monthly, realised_monthly_fii = get_position_info(transactions, param)
-        
+        positions, realised_monthly_stocks, realised_monthly_fii, realised_monthly_options = get_position_info(transactions, param)
+        realised_monthly = pd.concat([realised_monthly_stocks, realised_monthly_fii, realised_monthly_options], axis = 1).fillna(0).sum(axis = 1)
+        realised_monthly.name = "Realizado"
+        realised_monthly.index.name = "Mês"
+
         filename = f'posicoes_{param}.xlsx'
         positions.to_excel(filename, index = False)
 
         writer = pd.ExcelWriter(filename)
         positions.to_excel(writer, 'Posições')
         realised_monthly.to_excel(writer, 'Lucro Realizado Total')
-        realised_monthly_fii.to_excel(writer, 'Lucro Realizado (Somente FIIs)')
+        realised_monthly_stocks.to_excel(writer, 'Lucro Realizado (Ações)')
+        realised_monthly_options.to_excel(writer, 'Lucro Realizado (Opções)')
+        realised_monthly_fii.to_excel(writer, 'Lucro Realizado (FIIs)')
         writer.save()
 
         beutify_positions_excel(filename, history_column = 'F')
@@ -69,11 +79,13 @@ def get_args():
 def get_declaration_info(transactions, interest_year):
     previous_year = interest_year - 1
 
-    positions_previous_year, realised_monthly_previous_year, realised_monthly_fii_previous_year = get_position_info(transactions, f'{previous_year}-12-31')
-    positions_interest_year, realised_monthly_interest_year, realised_monthly_fii_interest_year = get_position_info(transactions, f'{interest_year}-12-31', ignore_history_previous_to = interest_year)
+    positions_previous_year, realised_monthly_stocks_previous_year, realised_monthly_fii_previous_year, realised_monthly_options_previous_year = \
+        get_position_info(transactions, f'{previous_year}-12-31')
+    positions_interest_year, realised_monthly_stocks_interest_year, realised_monthly_fii_interest_year, realised_monthly_options_interest_year = \
+        get_position_info(transactions, f'{interest_year}-12-31', ignore_history_previous_to = interest_year)
 
     declaration = prepare_declaration_dataframe(positions_previous_year, positions_interest_year, interest_year)
-    return declaration, realised_monthly_interest_year, realised_monthly_fii_interest_year
+    return declaration, realised_monthly_stocks_interest_year, realised_monthly_fii_interest_year, realised_monthly_options_interest_year
 
 
 def prepare_declaration_dataframe(positions_previous_year, positions_interest_year, interest_year):
@@ -100,11 +112,12 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
     ignore_history_previous_to = int(ignore_history_previous_to)
 
     positions = {}
-    realised_monthly = pd.Series(name = 'Realizado Mensal', dtype = "float64")
-    realised_monthly_fii = pd.Series(name = 'Realizado Mensal', dtype = "float64")
+    realised_monthly_stocks = pd.Series(name = 'Realizado', dtype = "float64")
+    realised_monthly_fii = pd.Series(name = 'Realizado', dtype = "float64")
+    realised_monthly_options = pd.Series(name = 'Realizado', dtype = "float64")
 
-    for index, transaction in transactions[:limit_date].iterrows():
-        ignore_history = ignore_history_previous_to > index.year
+    for transaction_date, transaction in transactions[:limit_date].iterrows():
+        ignore_history = ignore_history_previous_to > transaction_date.year
         
         codigo = transaction['Codigo']
         if codigo == 'USIMA96E':
@@ -122,34 +135,47 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
             position = positions[codigo]
 
         if transaction['Fluxo'] == 'C':
-            position, realised = process_buy(index, position, transaction, ignore_history)
+            position, realised = process_buy(transaction_date, position, transaction, ignore_history)
         elif transaction['Fluxo'] == 'V':
-            position, realised = process_sell(index, position, transaction, ignore_history)
+            position, realised = process_sell(transaction_date, position, transaction, ignore_history)
 
         position = update_position_status(position)
 
-        realised_monthly = realised_monthly.append(
-                pd.Series([realised], name = "Realizado Mensal", index = [index])
-            )
-        if "FII" in transaction["Ativo"] and "CI" in transaction["Ativo"]:
+        if transaction['Tipo'] == "Ação":
+            realised_monthly_stocks = realised_monthly_stocks.append(
+                    pd.Series([realised], name = "Realizado Mensal", index = [transaction_date])
+                )
+        elif transaction['Tipo'] == "FII":
             realised_monthly_fii = realised_monthly_fii.append(
-                pd.Series([realised], name = "Realizado Mensal", index = [index])
+                pd.Series([realised], name = "Realizado Mensal", index = [transaction_date])
+            )
+        elif transaction['Tipo'] == "Opção":
+            realised_monthly_options = realised_monthly_options.append(
+                pd.Series([realised], name = "Realizado Mensal", index = [transaction_date])
             )
         
         positions[codigo] = position
 
-    realised_monthly = realised_monthly.groupby(pd.Grouper(freq = "M")).sum().resample("M").asfreq().fillna(0)
-    realised_monthly.index = realised_monthly.index.date
-    realised_monthly.index.name = "Mês"
+    realised_monthly_stocks = realised_monthly_stocks.groupby(pd.Grouper(freq = "M")).sum().resample("M").asfreq().fillna(0)
+    realised_monthly_stocks.index = realised_monthly_stocks.index.date
+    realised_monthly_stocks.index.name = "Mês"
+    realised_monthly_stocks.name = "Realizado"
 
     realised_monthly_fii = realised_monthly_fii.groupby(pd.Grouper(freq = "M")).sum().resample("M").asfreq().fillna(0)
     realised_monthly_fii.index = realised_monthly_fii.index.date
     realised_monthly_fii.index.name = "Mês"
+    realised_monthly_fii.name = "Realizado"
+
+    realised_monthly_options = realised_monthly_options.groupby(pd.Grouper(freq = "M")).sum().resample("M").asfreq().fillna(0)
+    realised_monthly_options.index = realised_monthly_options.index.date
+    realised_monthly_options.index.name = "Mês"
+    realised_monthly_options.name = "Realizado"
+
     positions_df = prepare_position_dataframe(positions)
-    return positions_df, realised_monthly.round(2), realised_monthly_fii.round(2)
+    return positions_df, realised_monthly_stocks.round(2), realised_monthly_fii.round(2), realised_monthly_options.round(2)
 
 
-def process_buy(index, position, transaction, ignore_history = False):
+def process_buy(transaction_date, position, transaction, ignore_history = False):
     realised = 0
     if position['status'] != 'short':
         position['preco_medio'] = (position['qtd']*position['preco_medio'] + transaction['Quantidade']*transaction['Preco'])/(position['qtd'] + transaction['Quantidade'])
@@ -157,12 +183,12 @@ def process_buy(index, position, transaction, ignore_history = False):
         realised = transaction['Quantidade'] * (position['preco_medio'] - transaction['Preco'])
     position['qtd'] = position['qtd'] + transaction['Quantidade']
     if not ignore_history:
-        position['historico'].append(f'{index.date()} Compra de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+        position['historico'].append(f'{transaction_date.date()} Compra de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
 
     return position, realised
 
 
-def process_sell(index, position, transaction, ignore_history = False):
+def process_sell(transaction_date, position, transaction, ignore_history = False):
     realised = 0
     if position['status'] == 'long':
         realised = (-transaction['Quantidade']) * (transaction['Preco'] - position['preco_medio'])
@@ -170,7 +196,7 @@ def process_sell(index, position, transaction, ignore_history = False):
         position['preco_medio'] = ((-position['qtd'])*position['preco_medio'] - transaction['Quantidade']*transaction['Preco'])/((-position['qtd']) - transaction['Quantidade'])
     position['qtd'] = position['qtd'] + transaction['Quantidade']
     if not ignore_history:
-        position['historico'].append(f'{index.date()} Venda de {position["asset"]} ({-transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+        position['historico'].append(f'{transaction_date.date()} Venda de {position["asset"]} ({-transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
 
     return position, realised
 
