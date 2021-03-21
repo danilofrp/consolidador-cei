@@ -30,6 +30,7 @@ def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False)
     }, inplace = True)
 
     transactions['Data'] = pd.to_datetime(transactions['Data'], dayfirst = True)
+    transactions['Prazo'] = pd.to_datetime(transactions['Prazo'], dayfirst = True)
     transactions.set_index('Data', inplace = True)
     transactions.sort_index(inplace = True)
 
@@ -40,6 +41,7 @@ def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False)
     transactions['Quantidade'] = transactions['Quantidade'] * transactions['Fluxo'].map({"C": 1, "V": -1})
     transactions['Valor Total'] = transactions['Valor Total'] * transactions['Fluxo'].map({"C": 1, "V": -1})
     transactions['Tipo'] = transactions.apply(define_transaction_type, axis = 1)
+
 
     if save_to_file:
         save_data = transactions.copy()

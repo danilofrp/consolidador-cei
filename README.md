@@ -69,13 +69,12 @@ o script consolida informações compra e venda de ações para imposto de renda
 ![declaracao_2019.xlsx -> Lucro Realizado](https://github.com/danilofrp/consolidador-cei/blob/master/img/realizado.png "declaracao_2019.xlsx -> Lucro Realizado")
 
 
-### Melhorias previstas
+### Atenção!
 Atualmente, o script não processa as seguintes informações:
 
 - Exercício de opções
-- Vencimento de opções sem exercício
 
-A compra e venda de opções é processada normalmente. O desenvolvimento destas e outras funcionalidades é esperado no futuro
+O desenvolvimento destas e outras funcionalidades é esperado no futuro. A compra e venda de opções é processada normalmente, e o processamento do vencimento de opções considera que todas viram pó.
 
 
 ### Colaboração

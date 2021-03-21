@@ -1,5 +1,5 @@
 import sys, os
-import re
+import numpy as np
 import pandas as pd
 from datetime import date
 from openpyxl import Workbook, load_workbook
@@ -111,17 +111,39 @@ def prepare_declaration_dataframe(positions_previous_year, positions_interest_ye
 def get_position_info(transactions, limit_date, ignore_history_previous_to = 1900):
     ignore_history_previous_to = int(ignore_history_previous_to)
 
+    vencimentos_opcoes = pd.Series(name = "qtd", index = pd.MultiIndex.from_arrays([[], []], names = ["date", "code"]), dtype = "float64")
+
+    for transaction_date, transaction in transactions[:limit_date].iterrows():
+        if transaction['Tipo'] == "Opção":
+            try:
+                vencimentos_opcoes.loc[(transaction["Prazo"], transaction['Codigo'])] += transaction["Quantidade"]
+            except KeyError: 
+                vencimentos_opcoes.loc[(transaction["Prazo"], transaction['Codigo'])] = transaction["Quantidade"]
+    vencimentos_opcoes = vencimentos_opcoes.replace(0, np.nan).dropna()
+
+    for (transaction_date, codigo), quantidade in vencimentos_opcoes.iteritems():
+        new_transaction = pd.Series({
+            "Fluxo": "V" if quantidade > 0 else "C",
+            "Mercado": "Opção (Vencimento)",
+            "Prazo": np.nan,
+            "Codigo": codigo,
+            "Ativo": "",
+            "Quantidade": -quantidade,
+            "Preco": 0,
+            "Valor Total": 0, 
+            "Corretora": "",
+            "Tipo": "Opção (Vencimento)",
+        }, name = transaction_date)
+        transactions = transactions.append(new_transaction)
+    transactions = transactions.sort_index()
+
     positions = {}
     realised_monthly_stocks = pd.Series(name = 'Realizado', dtype = "float64")
     realised_monthly_fii = pd.Series(name = 'Realizado', dtype = "float64")
-    realised_monthly_options = pd.Series(name = 'Realizado', dtype = "float64")
-
+    realised_monthly_options = pd.Series(name = 'Realizado', dtype = "float64")        
     for transaction_date, transaction in transactions[:limit_date].iterrows():
-        ignore_history = ignore_history_previous_to > transaction_date.year
-        
+
         codigo = transaction['Codigo']
-        if codigo == 'USIMA96E':
-            codigo = 'USIM5'
         
         if codigo not in positions:
             position = {
@@ -134,10 +156,12 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
         else:
             position = positions[codigo]
 
+        vencimento_opcao = (transaction["Tipo"] == "Opção (Vencimento)")
+        ignore_history = ignore_history_previous_to > transaction_date.year
         if transaction['Fluxo'] == 'C':
-            position, realised = process_buy(transaction_date, position, transaction, ignore_history)
+            position, realised = process_buy(transaction_date, position, transaction, ignore_history, vencimento_opcao)
         elif transaction['Fluxo'] == 'V':
-            position, realised = process_sell(transaction_date, position, transaction, ignore_history)
+            position, realised = process_sell(transaction_date, position, transaction, ignore_history, vencimento_opcao)
 
         position = update_position_status(position)
 
@@ -149,10 +173,16 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
             realised_monthly_fii = realised_monthly_fii.append(
                 pd.Series([realised], name = "Realizado Mensal", index = [transaction_date])
             )
-        elif transaction['Tipo'] == "Opção":
+        elif transaction['Tipo'] in ("Opção", "Opção (Vencimento)"):
             realised_monthly_options = realised_monthly_options.append(
                 pd.Series([realised], name = "Realizado Mensal", index = [transaction_date])
             )
+
+            try:
+                vencimentos_opcoes.loc[(transaction["Prazo"], codigo)] += transaction["Quantidade"]
+            except KeyError: 
+                vencimentos_opcoes.loc[(transaction["Prazo"], codigo)] = transaction["Quantidade"]
+            vencimentos_opcoes = vencimentos_opcoes.replace(0, np.nan).dropna()
         
         positions[codigo] = position
 
@@ -175,7 +205,7 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
     return positions_df, realised_monthly_stocks.round(2), realised_monthly_fii.round(2), realised_monthly_options.round(2)
 
 
-def process_buy(transaction_date, position, transaction, ignore_history = False):
+def process_buy(transaction_date, position, transaction, ignore_history = False, vencimento_opcao = False):
     realised = 0
     if position['status'] != 'short':
         position['preco_medio'] = (position['qtd']*position['preco_medio'] + transaction['Quantidade']*transaction['Preco'])/(position['qtd'] + transaction['Quantidade'])
@@ -183,12 +213,15 @@ def process_buy(transaction_date, position, transaction, ignore_history = False)
         realised = transaction['Quantidade'] * (position['preco_medio'] - transaction['Preco'])
     position['qtd'] = position['qtd'] + transaction['Quantidade']
     if not ignore_history:
-        position['historico'].append(f'{transaction_date.date()} Compra de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+        if vencimento_opcao:
+            position['historico'].append(f'{transaction_date.date()} Vencimento de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+        else:
+            position['historico'].append(f'{transaction_date.date()} Compra de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
 
     return position, realised
 
 
-def process_sell(transaction_date, position, transaction, ignore_history = False):
+def process_sell(transaction_date, position, transaction, ignore_history = False, vencimento_opcao = False):
     realised = 0
     if position['status'] == 'long':
         realised = (-transaction['Quantidade']) * (transaction['Preco'] - position['preco_medio'])
@@ -196,7 +229,10 @@ def process_sell(transaction_date, position, transaction, ignore_history = False
         position['preco_medio'] = ((-position['qtd'])*position['preco_medio'] - transaction['Quantidade']*transaction['Preco'])/((-position['qtd']) - transaction['Quantidade'])
     position['qtd'] = position['qtd'] + transaction['Quantidade']
     if not ignore_history:
-        position['historico'].append(f'{transaction_date.date()} Venda de {position["asset"]} ({-transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+        if vencimento_opcao:
+            position['historico'].append(f'{transaction_date.date()} Vencimento de {position["asset"]} ({-transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+        else:
+            position['historico'].append(f'{transaction_date.date()} Venda de {position["asset"]} ({-transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
 
     return position, realised
 
