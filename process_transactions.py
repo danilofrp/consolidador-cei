@@ -79,6 +79,8 @@ def get_args():
 def get_declaration_info(transactions, interest_year):
     previous_year = interest_year - 1
 
+    assert len(transactions[:f'{previous_year}-12-31'])>0, f'No transaction found for previus year ({previous_year}). If its your first declaration, use the option --position yyy-mm-dd instead'
+
     positions_previous_year, realised_monthly_stocks_previous_year, realised_monthly_fii_previous_year, realised_monthly_options_previous_year = \
         get_position_info(transactions, f'{previous_year}-12-31')
     positions_interest_year, realised_monthly_stocks_interest_year, realised_monthly_fii_interest_year, realised_monthly_options_interest_year = \
@@ -141,6 +143,7 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
     realised_monthly_stocks = pd.Series(name = 'Realizado', dtype = "float64")
     realised_monthly_fii = pd.Series(name = 'Realizado', dtype = "float64")
     realised_monthly_options = pd.Series(name = 'Realizado', dtype = "float64")        
+
     for transaction_date, transaction in transactions[:limit_date].iterrows():
 
         codigo = transaction['Codigo']
@@ -186,16 +189,20 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
         
         positions[codigo] = position
 
+
+    if(len(realised_monthly_stocks)>0):
     realised_monthly_stocks = realised_monthly_stocks.groupby(pd.Grouper(freq = "M")).sum().resample("M").asfreq().fillna(0)
     realised_monthly_stocks.index = realised_monthly_stocks.index.date
     realised_monthly_stocks.index.name = "Mês"
     realised_monthly_stocks.name = "Realizado"
 
+    if(len(realised_monthly_fii)>0):
     realised_monthly_fii = realised_monthly_fii.groupby(pd.Grouper(freq = "M")).sum().resample("M").asfreq().fillna(0)
     realised_monthly_fii.index = realised_monthly_fii.index.date
     realised_monthly_fii.index.name = "Mês"
     realised_monthly_fii.name = "Realizado"
 
+    if(len(realised_monthly_options)>0):
     realised_monthly_options = realised_monthly_options.groupby(pd.Grouper(freq = "M")).sum().resample("M").asfreq().fillna(0)
     realised_monthly_options.index = realised_monthly_options.index.date
     realised_monthly_options.index.name = "Mês"
