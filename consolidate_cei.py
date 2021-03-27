@@ -2,6 +2,7 @@ import os
 import re
 import xlrd
 import pandas as pd
+from unidecode import unidecode
 
 def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False):
     cols = ['Data Negócio', 'C/V', 'Mercado', "Prazo", 'Código', 'Especificação do Ativo', 'Quantidade', 'Preço (R$)', 'Valor Total (R$)']
@@ -56,11 +57,11 @@ def consolidate_cei_extracts(base_folder = 'extratos_cei', save_to_file = False)
 def define_transaction_type(row):
     if ("11" in row["Codigo"].upper() or "12" in row["Codigo"].upper()) and "FII " in row["Ativo"].upper():
         return "FII"
-    elif row["Mercado"].lower().strip() in ("opção de compra", "opção de venda") and not pd.isna(row["Prazo"]):
+    elif unidecode(row["Mercado"].lower().strip()) in ("opcao de compra", "opcao de venda") and not pd.isna(row["Prazo"]):
         return "Opção"
-    elif row["Mercado"].lower().strip() == "exercicio de opções":
+    elif unidecode(row["Mercado"].lower().strip()) == "exercicio de opcoes":
         return "Opção (Exercício)"
-    elif row["Mercado"].lower().strip() in ("mercado a vista", "merc. fracionario"):
+    elif unidecode(row["Mercado"].lower().strip()) in ("mercado a vista", "merc. fracionario"):
         return "Ação"
     else:
         return "desconhecido"
