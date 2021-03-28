@@ -1,0 +1,5 @@
+unidecode==1.2.0
+pandas==0.25.1
+numpy==1.16.4
+openpyxl==3.0.6
+xlrd==2.0.1
