@@ -52,11 +52,11 @@ O resultado será salvo na planilha `consolidado_proventos.xslx`, contendo 6 aba
 #### Exemplo de uso:
 Na pasta `extratos_cei` se encontram duas planilhas, `movimentacao_2021.xls` e `movimentacao_2020.xls`. O conteúdo destas planilhas pode ser visto abaixo:
 
-**2020_negociacoes_cei_clear.xls**<br>
-![2020_negociacoes_cei_clear.xls](https://github.com/danilofrp/consolidador-cei/blob/master/img/2020_extrato_cei_clear.png "2020_negociacoes_cei_clear.xls")
+**movimentacao_2021.xls**<br>
+![movimentacao_2021.xls](img/2020_extrato_cei_clear.png "movimentacao_2021.xls")
 
-**2021_negociacoes_cei_clear.xls**<br>
-![2021_negociacoes_cei_clear.xls](https://github.com/danilofrp/consolidador-cei/blob/master/img/2021_extrato_cei_clear.png "2021_negociacoes_cei_clear.xls")
+**movimentacao_2021.xls**<br>
+![movimentacao_2021.xls](img/2021_extrato_cei_clear.png "movimentacao_2021.xls")
 
 Ao rodar o comando
 ```
@@ -65,7 +65,7 @@ python process_transactions.py --posicao 2022-01-01
 o script nos dá todas as negociações feitas e a posição até no dia 01/01/2022. Estas informaçoes ficam salvas na planilha `posicoes_2022-01-01.xlsx`, que pode ser vista abaixo:
 
 **posicoes_2022-01-01.xlsx**<br>
-![posicoes_2022-01-01.xlsx](https://github.com/danilofrp/consolidador-cei/blob/master/img/posicao.png "posicoes_2022-01-01.xlsx")
+![posicoes_2022-01-01.xlsx](/img/posicao.png "posicoes_2022-01-01.xlsx")
 
 
 Rodando o comando
@@ -75,10 +75,10 @@ python process_transactions.py --declaracao 2022
 o script consolida informações compra e venda de ações para imposto de renda, nos dando todas as posições em 31 de dezembro de 2021 e de 2022, e também o lucro/prejuízo realizado a cada mês, em diferentes abas. Estas informaçoes ficam salvas na planilha `declaracao_2022.xlsx`, que pode ser vista abaixo:
 
 **declaracao_2022.xlsx -> Declaração de bens**<br>
-![declaracao_2022.xlsx -> Declaração de bens](https://github.com/danilofrp/consolidador-cei/blob/master/img/declaracao.png "declaracao_2022.xlsx -> Declaração de bens")
+![declaracao_2022.xlsx -> Declaração de bens](img/declaracao.png "declaracao_2022.xlsx -> Declaração de bens")
 
 **declaracao_2022.xlsx -> Lucro Realizado**<br>
-![declaracao_2022.xlsx -> Lucro Realizado](https://github.com/danilofrp/consolidador-cei/blob/master/img/realizado.png "declaracao_2022.xlsx -> Lucro Realizado")
+![declaracao_2022.xlsx -> Lucro Realizado](img/realizado.png "declaracao_2022.xlsx -> Lucro Realizado")
 
 
 ### Bonificação em Ações (Novidade):
@@ -87,7 +87,7 @@ Os scripts foram atualizados para considerar as bonificações em ações na dec
 Para que assim seja computado, deve-se preencher o preço médio das ações bonificações nas planilhas de movimentação conforme exemplo abaixo. O preço médio de cada evento de bonificação pode ser encontrado nos anuncios oficiais das respectivas empresas.
 
 **Bonificação em Ações**<br>
-![bonificacao_acoes](https://github.com/danilofrp/consolidador-cei/blob/master/img/bonificacao_acoes.png "bonificacao_acoes")
+![bonificacao_acoes](img/bonificacao_acoes.png "bonificacao_acoes")
 
 Obs: a bonificação também deve ser declarada na seção "Rendimentos Isentos e Não Tributáveis".
 
@@ -103,7 +103,7 @@ python consolidate_earnings
 O resultado será realizado na planilha `consolidado_proventos.xlsx`.
 
 **Proventos e Juros Sobre Capital Próprio**<br>
-![proventos](https://github.com/danilofrp/consolidador-cei/blob/master/img/proventos.png "proventos")
+![proventos](img/proventos.png "proventos")
 
 
 ### Atenção!
