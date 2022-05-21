@@ -106,6 +106,7 @@ O resultado será realizado na planilha `consolidado_proventos.xlsx`.
 ![proventos](img/proventos.png "proventos")
 
 
+
 ### Atenção!
 Atualmente, o script não processa as seguintes informações:
 
