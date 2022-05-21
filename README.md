@@ -53,10 +53,12 @@ O resultado será salvo na planilha `consolidado_proventos.xslx`, contendo 6 aba
 Na pasta `extratos_cei` se encontram duas planilhas, `movimentacao_2021.xls` e `movimentacao_2020.xls`. O conteúdo destas planilhas pode ser visto abaixo:
 
 **movimentacao_2021.xls**<br>
-![movimentacao_2021.xls](img/2020_extrato_cei_clear.png "movimentacao_2021.xls")
+<img src="img/2020_extrato_cei_clear.png" width="900">
+
 
 **movimentacao_2021.xls**<br>
-![movimentacao_2021.xls](img/2021_extrato_cei_clear.png "movimentacao_2021.xls")
+<img src="img/2021_extrato_cei_clear.png" width="900">
+
 
 Ao rodar o comando
 ```
@@ -78,7 +80,9 @@ o script consolida informações compra e venda de ações para imposto de renda
 ![declaracao_2022.xlsx -> Declaração de bens](img/declaracao.png "declaracao_2022.xlsx -> Declaração de bens")
 
 **declaracao_2022.xlsx -> Lucro Realizado**<br>
-![declaracao_2022.xlsx -> Lucro Realizado](img/realizado.png "declaracao_2022.xlsx -> Lucro Realizado")
+<!-- ![declaracao_2022.xlsx -> Lucro Realizado](img/realizado.png "declaracao_2022.xlsx -> Lucro Realizado") -->
+<img src="img/realizado.png" height="380">
+
 
 
 ### Bonificação em Ações (Novidade):
@@ -103,7 +107,9 @@ python consolidate_earnings
 O resultado será realizado na planilha `consolidado_proventos.xlsx`.
 
 **Proventos e Juros Sobre Capital Próprio**<br>
-![proventos](img/proventos.png "proventos")
+<!-- ![proventos](img/proventos.png "proventos") -->
+
+<img src="img/proventos.png" width="480">
 
 
 ### Atenção!
