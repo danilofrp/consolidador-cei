@@ -14,9 +14,9 @@ def main():
         return
 
     transactions = consolidate_cei_extracts(save_to_file = False)
-
-    # transactions = pd.read_excel('consolidado_cei.xlsx', index_col = 'Data', parse_dates = True).sort_index()
-
+    
+    transactions = transactions[transactions["Tipo"]!="desconhecido"]
+    
     if action == '--declaracao':
         declaration, realised_monthly_stocks, realised_monthly_fii, realised_monthly_options = get_declaration_info(transactions, param)
         realised_monthly = pd.concat([realised_monthly_stocks, realised_monthly_fii, realised_monthly_options], axis = 1).fillna(0).sum(axis = 1)
@@ -80,6 +80,7 @@ def get_declaration_info(transactions, interest_year):
     previous_year = interest_year - 1
 
     assert len(transactions[:f'{previous_year}-12-31'])>0, f'No transaction found for previus year ({previous_year}). If its your first declaration, use the position option: --position yyy-mm-dd instead'
+
 
     positions_previous_year, realised_monthly_stocks_previous_year, realised_monthly_fii_previous_year, realised_monthly_options_previous_year = \
         get_position_info(transactions, f'{previous_year}-12-31')
@@ -160,7 +161,9 @@ def get_position_info(transactions, limit_date, ignore_history_previous_to = 190
             position = positions[codigo]
 
         vencimento_opcao = (transaction["Tipo"] == "Opção (Vencimento)")
-        ignore_history = ignore_history_previous_to > transaction_date.year
+        # ignore_history = ignore_history_previous_to > transaction_date.year
+        ignore_history = False
+        
         if transaction['Fluxo'] == 'C':
             position, realised = process_buy(transaction_date, position, transaction, ignore_history, vencimento_opcao)
         elif transaction['Fluxo'] == 'V':
@@ -223,8 +226,12 @@ def process_buy(transaction_date, position, transaction, ignore_history = False,
         if vencimento_opcao:
             position['historico'].append(f'{transaction_date.date()} Vencimento de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
         else:
-            position['historico'].append(f'{transaction_date.date()} Compra de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+            if(transaction["Movimentação"]=="Transferência - Liquidação"):
+                position['historico'].append(f'{transaction_date.date()} Compra de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
+            if(transaction["Movimentação"]=="Bonificação em Ativos"):
+                position['historico'].append(f'{transaction_date.date()} Bonificação de {position["asset"]} ({transaction["Quantidade"]} x {transaction["Preco"]:.2f})')
 
+                
     return position, realised
 
 
