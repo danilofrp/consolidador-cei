@@ -1,8 +1,7 @@
 *.xlsx
 *.xlsx#
-extratos_cei/
-extratos_mensais/
 
+!movimentacoes/*.xlsx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
